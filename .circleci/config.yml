@@ -11,7 +11,7 @@ jobs:
           name: Show current branch
           command: echo ${CURRENT_BRANCH}
       - restore_cache:
-          key: 
+          keys: 
            - app-{{ checksum "package.json" }}
            - app-
       - run:
@@ -86,7 +86,7 @@ jobs:
       - run:
           name: Deploy to AWS Cloudfront
           command: |
-          aws configure set preview.cloudfront
+            aws configure set preview.cloudfront
             if [ "${CURRENT_BRANCH}" == "main" ]
             then 
               aws cloudfront create-invalidation -distribution-id ${AWS_PROD_DISTRIBUTION_ID} -paths /\*
