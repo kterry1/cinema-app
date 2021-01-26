@@ -1,15 +1,22 @@
 version: 2.1
-
-jobs: 
-  build: 
+executors:
+  app-executor:
     docker:
       - image: circleci/node:latest
     working_directory: ~/repo
+
+aliases: 
+  - &show-current-branch-name
+    run: 
+      name: Show current branch
+      command: echo ${CIRCLE_BRANCH}
+
+jobs: 
+  build: 
+    executor: app-exectutor
     steps:
       - checkout
-      - run: 
-          name: Show current branch
-          command: echo ${CIRCLE_BRANCH}
+      - *show-current-branch-name
       - restore_cache:
           keys: 
            - app-{{ checksum "package.json" }}
@@ -21,16 +28,24 @@ jobs:
           paths:
             - node_modules
           key: app-{{ checksum "package.json" }}
-
-  deploy-to-aws-s3:
-    docker:
-      - image: circleci/node:latest
-    working_directory: ~/repo
+  linting:
+         executor: app-exectutor
     steps:
       - checkout
+      - *show-current-branch-name
+      - restore_cache:
+          keys: 
+           - app-{{ checksum "package.json" }}
+           - app-
       - run:
-          name: Show current branch
-          command: echo ${CIRCLE_BRANCH}
+          name: Run linting
+          command: npm run lint
+
+  deploy-to-aws-s3:
+    executor: app-exectutor
+    steps:
+      - checkout
+      - *show-current-branch-name
       - run:
           name: Installing AWS CLI
           working_directory: /
@@ -60,14 +75,10 @@ jobs:
             fi
 
   deploy-to-aws-cloudfront:
-    docker:
-      - image: circleci/node:latest
-    working_directory: ~/repo
+    executor: app-exectutor
     steps:
       - checkout
-      - run:
-          name: Show current branch
-          command: echo ${CIRCLE_BRANCH}
+      - *show-current-branch-name
       - run:
           name: Installing AWS CLI
           working_directory: /
@@ -101,9 +112,18 @@ workflows:
   build_and_deploy:
     jobs:
       - build
+      - linting:
+          requires:
+            -build
+          filters:    
+            branches:
+              only:
+                - development
+                - staging
+                - main 
       - deploy-to-aws-s3:
           requires:
-            - build
+            - linting
           filters:
             branches:
               only:
