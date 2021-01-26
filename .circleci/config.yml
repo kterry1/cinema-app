@@ -29,17 +29,17 @@ jobs:
             - node_modules
           key: app-{{ checksum "package.json" }}
   linting:
-         executor: app-exectutor
-    steps:
-      - checkout
-      - *show-current-branch-name
-      - restore_cache:
-          keys: 
-           - app-{{ checksum "package.json" }}
-           - app-
-      - run:
-          name: Run linting
-          command: npm run lint
+      executor: app-exectutor
+      steps:
+        - checkout
+        - *show-current-branch-name
+        - restore_cache:
+            keys: 
+            - app-{{ checksum "package.json" }}
+            - app-
+        - run:
+            name: Run linting
+            command: npm run lint
 
   deploy-to-aws-s3:
     executor: app-exectutor
