@@ -13,7 +13,7 @@ aliases:
 
 jobs: 
   build: 
-    executor: app-exectutor
+    executor: app-executor
     steps:
       - checkout
       - *show-current-branch-name
@@ -29,7 +29,7 @@ jobs:
             - node_modules
           key: app-{{ checksum "package.json" }}
   linting:
-      executor: app-exectutor
+      executor: app-executor
       steps:
         - checkout
         - *show-current-branch-name
@@ -42,7 +42,7 @@ jobs:
             command: npm run lint
 
   deploy-to-aws-s3:
-    executor: app-exectutor
+    executor: app-executor
     steps:
       - checkout
       - *show-current-branch-name
@@ -75,7 +75,7 @@ jobs:
             fi
 
   deploy-to-aws-cloudfront:
-    executor: app-exectutor
+    executor: app-executor
     steps:
       - checkout
       - *show-current-branch-name
